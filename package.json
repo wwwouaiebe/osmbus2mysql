@@ -1,0 +1,36 @@
+{
+    "type": "module",
+    "name": "osmbus2mysql",
+    "description": "Coming soon",
+    "main": "bin/index.js",
+    "bin": {
+        "sd": "./src/index.js"
+    },
+    "version": "1.0.0",
+    "keywords": [],
+    "devDependencies": {
+        "eslint": "latest",
+        "grunt": "latest",
+        "grunt-eslint": "latest",
+        "grunt-essimpledoc": "latest",
+        "grunt-wwwouaiebe-buildnumber": "latest"
+    },
+    "dependencies": {
+        "mysql2": "latest"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/wwwouaiebe/osmbus2mysql.git"
+    },
+    "engines": {
+        "node": ">=20.9.0"
+    },
+    "scripts": {
+        "debug": "node node_modules/grunt/bin/grunt",
+        "osmbus2mysql": "node ./src/index.js --dbName=osmbus"
+    },
+    "author": "wwwouaiebe",
+    "license": "GPL-3.0",
+    "sources": "https://github.com/wwwouaiebe/osmbus2mysql",
+    "homepage": "https://github.com/wwwouaiebe/osm2mysql#readme"
+}
