@@ -25,6 +25,8 @@ Changes:
 import process from 'process';
 import theConfig from './Config.js';
 import OsmBusLoader from './OsmBusLoader.js';
+import WikiBusLoader from './WikiBusLoader.js';
+import theMySqlDb from './MySqlDb.js';
 
 /* ------------------------------------------------------------------------------------------------------------------------- */
 /**
@@ -60,8 +62,19 @@ class AppLoader {
 				arg => {
 					const argContent = arg.split ( '=' );
 					switch ( argContent [ 0 ] ) {
+					case '--src' :
+						theConfig.srcDir = argContent [ 1 ] || theConfig.srcDir;
+						break;
 					case '--dbName' :
 						theConfig.dbName = argContent [ 1 ];
+						break;
+					case '--wiki' :
+						theConfig.wiki = argContent [ 1 ] || theConfig.wiki;
+						break;
+					case '--osmbus' :
+						if ( 'true' === argContent [ 1 ] ) {
+							theConfig.osmBus = true;
+						}
 						break;
 					case '--version' :
 						console.error ( `\n\t\x1b[36mVersion : ${AppLoader.#version}\x1b[0m\n` );
@@ -97,7 +110,31 @@ class AppLoader {
 		// config
 		this.#createConfig ( options );
 
-		new OsmBusLoader ( ).start ( );
+		const startTime = process.hrtime.bigint ( );
+
+		console.info ( '\nStarting gtfs2mysql ...\n\n' );
+		await theMySqlDb.start ( );
+
+		if ( '' !== theConfig.wiki ) {
+			await ( new WikiBusLoader ( ).start ( ) );
+		}
+
+		if ( theConfig.osmBus ) {
+			await ( new OsmBusLoader ( ).start ( ) );
+		}
+
+		await theMySqlDb.end ( );
+
+		// end of the process
+		const deltaTime = process.hrtime.bigint ( ) - startTime;
+
+		/* eslint-disable-next-line no-magic-numbers */
+		const execTime = String ( deltaTime / 1000000000n ) + '.' + String ( deltaTime % 1000000000n ).substring ( 0, 3 );
+
+		console.info ( `\nFiles generated in ${execTime} seconds.` );
+
+		console.info ( '\ngtfs2mysql ended...\n\n' );
+
 	}
 
 }

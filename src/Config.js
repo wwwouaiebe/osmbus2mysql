@@ -52,6 +52,20 @@ class Config {
 	dbName;
 
 	/**
+	 * True when the wiki contain must be loaded
+	 * @type {boolean}
+	 */
+
+	wiki;
+
+	/**
+	 * True when osm buses must be loaded
+	 * @type {string}
+	 */
+
+	osmBus;
+
+	/**
 	 * Comng soon...
 	 * @type {Number}
 	 */
@@ -67,6 +81,8 @@ class Config {
 		this.srcDir = '';
 		this.appDir = '';
 		this.dbName = '';
+		this.wiki = '';
+		this.osmBus = false;
 	}
 
 }

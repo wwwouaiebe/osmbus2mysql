@@ -50,7 +50,10 @@ class OsmBusLoader {
 		// 3602377747 anthisnes
 		await fetch (
 			'https://lz4.overpass-api.de/api/interpreter?data=[out:json][timeout:40];' +
-            'relation(area:3601407192)[network=TECL][operator=TEC][type=route][route=bus];out;'
+            'relation(area:3601407192)' +
+			'[network=TECL]' +
+			'[operator=TEC]' +
+			'[type=route][route=bus];out;'
 		)
 			.then (
 				response => {
@@ -143,28 +146,10 @@ class OsmBusLoader {
    */
 
 	async start ( ) {
-		const startTime = process.hrtime.bigint ( );
-
-		console.info ( '\nStarting gtfs2mysql ...\n\n' );
-		await theMySqlDb.start ( );
 
 		await this.#createTableOsmBusRoute ( );
 
 		await this.#osmDownload ( );
-
-		// await this.#loadOsmData ( );
-
-		await theMySqlDb.end ( );
-
-		// end of the process
-		const deltaTime = process.hrtime.bigint ( ) - startTime;
-
-		/* eslint-disable-next-line no-magic-numbers */
-		const execTime = String ( deltaTime / 1000000000n ) + '.' + String ( deltaTime % 1000000000n ).substring ( 0, 3 );
-
-		console.info ( `\nFiles generated in ${execTime} seconds.` );
-
-		console.info ( '\ngtfs2mysql ended...\n\n' );
 
 	}
 
