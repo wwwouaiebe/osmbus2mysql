@@ -30,7 +30,7 @@ import OsmLoader from './OsmLoader.js';
  */
 /* ------------------------------------------------------------------------------------------------------------------------- */
 
-class OsmBusLoader extends OsmLoader {
+class OsmBusStopLoader extends OsmLoader {
 
 	/**
      * The constructor
@@ -44,14 +44,13 @@ class OsmBusLoader extends OsmLoader {
 		// 3602377747 anthisnes
 		this.loadData.query =
 			'https://lz4.overpass-api.de/api/interpreter?data=[out:json][timeout:40];' +
-			'relation(area:3601407192)' +
-			'[network=TECL]' +
-			'[operator=TEC]' +
-			'[type=route][route=bus];out;';
-		this.loadData.tableName = 'osm_bus_route';
+			'nw(area:3601407192)' +
+			'[highway=bus_stop]' +
+			';out;';
+		this.loadData.tableName = 'osm_bus_stop';
 	}
 }
 
-export default OsmBusLoader;
+export default OsmBusStopLoader;
 
 /* --- End of file --------------------------------------------------------------------------------------------------------- */

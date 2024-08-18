@@ -66,6 +66,20 @@ class Config {
 	osmBus;
 
 	/**
+	 * True when osm buses stops must be loaded
+	 * @type {string}
+	 */
+
+	osmBusStop;
+
+	/**
+	 * True when osm stop positions must be loaded
+	 * @type {string}
+	 */
+
+	osmStopPosition;
+
+	/**
 	 * Comng soon...
 	 * @type {Number}
 	 */
@@ -83,6 +97,8 @@ class Config {
 		this.dbName = '';
 		this.wiki = '';
 		this.osmBus = false;
+		this.osmBusStop = false;
+		this.osmStopPosition = false;
 	}
 
 }

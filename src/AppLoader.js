@@ -25,6 +25,8 @@ Changes:
 import process from 'process';
 import theConfig from './Config.js';
 import OsmBusLoader from './OsmBusLoader.js';
+import OsmBusStopLoader from './OsmBusStopLoader.js';
+import OsmStopPositionLoader from './OsmStopPositionLoader.js';
 import WikiBusLoader from './WikiBusLoader.js';
 import theMySqlDb from './MySqlDb.js';
 
@@ -44,7 +46,7 @@ class AppLoader {
      * @type {String}
      */
 
-	static get #version ( ) { return 'v1.0.0'; }
+	static get #version ( ) { return 'v1.1.0'; }
 
 	/**
 	* Complete theConfig object from the app parameters
@@ -74,6 +76,23 @@ class AppLoader {
 					case '--osmbus' :
 						if ( 'true' === argContent [ 1 ] ) {
 							theConfig.osmBus = true;
+						}
+						break;
+					case '--osmbusstop' :
+						if ( 'true' === argContent [ 1 ] ) {
+							theConfig.osmBusStop = true;
+						}
+						break;
+					case '--osmstopposition' :
+						if ( 'true' === argContent [ 1 ] ) {
+							theConfig.osmStopPosition = true;
+						}
+						break;
+					case '--all' :
+						if ( 'true' === argContent [ 1 ] ) {
+							theConfig.osmBus = true;
+							theConfig.osmBusStop = true;
+							theConfig.osmStopPosition = true;
 						}
 						break;
 					case '--version' :
@@ -121,6 +140,14 @@ class AppLoader {
 
 		if ( theConfig.osmBus ) {
 			await ( new OsmBusLoader ( ).start ( ) );
+		}
+
+		if ( theConfig.osmBusStop ) {
+			await ( new OsmBusStopLoader ( ).start ( ) );
+		}
+
+		if ( theConfig.osmStopPosition ) {
+			await ( new OsmStopPositionLoader ( ).start ( ) );
 		}
 
 		await theMySqlDb.end ( );

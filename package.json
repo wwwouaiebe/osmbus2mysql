@@ -28,6 +28,8 @@
     "scripts": {
         "debug": "node node_modules/grunt/bin/grunt",
         "osmbus2mysql": "node ./src/index.js --osmbus=true --dbName=osmbus",
+        "osmbusstop2mysql": "node ./src/index.js --osmbusstop=true --dbName=osmbus",
+        "osmstopposition2mysql": "node ./src/index.js --osmstopposition=true --dbName=osmbus",
         "wiki2mysql": "node ./src/index.js --wiki=./wiki/wiki.txt --osmbus=true --dbName=osmbus"
     },
     "author": "wwwouaiebe",
