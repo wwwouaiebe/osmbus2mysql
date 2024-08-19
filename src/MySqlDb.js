@@ -63,7 +63,7 @@ class MySqlDb {
 
 	async #askCredentials ( ) {
 		console.clear ( );
-
+		console.info ( 'Login to MySql' );
 		const readlineInterface = readline.createInterface ( { input, output } );
 
 		readlineInterface.write ( 'What is your name?\n' );
@@ -74,6 +74,7 @@ class MySqlDb {
 
 		console.clear ( );
 		console.info ( '\x1b[0m' );
+		theConfig.startTime.push ( process.hrtime.bigint ( ) );
 	}
 
 	/**

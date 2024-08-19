@@ -31,6 +31,13 @@ Changes:
 class Config {
 
 	/**
+	* Coming soon
+	@type {Array}
+	 */
+
+	startTime = [];
+
+	/**
 	 * The path to the directory where the gtfs files are
 	 * @type {String}
 	 */

@@ -22,7 +22,6 @@ Changes:
 */
 /* ------------------------------------------------------------------------------------------------------------------------- */
 
-import theConfig from './Config.js';
 import theMySqlDb from './MySqlDb.js';
 import fs from 'fs';
 
@@ -31,6 +30,11 @@ import fs from 'fs';
    */
 
 class WikiBusLoader {
+
+	/**
+    * Coming soon...
+	* @type {number}
+   */
 
 	// eslint-disable-next-line no-magic-numbers
 	get #maxCommentSize ( ) { return 4096; }
@@ -55,7 +59,7 @@ class WikiBusLoader {
    */
 
 	#loadFile ( ) {
-		this.#fileContent = ( fs.readFileSync ( './wiki/wiki.txt', 'utf8' ) ).split ( /\r\n|\r|\n/ );
+		this.#fileContent = ( fs.readFileSync ( './wiki/oldWiki.txt', 'utf8' ) ).split ( /\r\n|\r|\n/ );
 	}
 
 	/**
@@ -64,18 +68,18 @@ class WikiBusLoader {
 
 	#controlFileContent ( ) {
 		let lineCounter = 0;
-		let errorsFound = false;
+		let fileOk = true;
 		this.#fileContent.forEach (
 			line => {
 				if ( this.#maxCommentSize < line.length ) {
 					lineCounter ++;
 					console.error ( 'The line ' + lineCounter + 'is too long' );
-					errorsFound = true;
+					fileOk = false;
 				}
 			}
 		);
 
-		return errorsFound;
+		return fileOk;
 	}
 
 	/**
@@ -83,17 +87,17 @@ class WikiBusLoader {
    */
 
 	async #createTableWikiBusRoute ( ) {
-		console.info ( '\nCreation of table wiki_bus_route...' );
+		console.info ( '\nCreation of table wiki_bus_routes...' );
 
 		await theMySqlDb.execSql (
-			'DROP TABLE if EXISTS wiki_bus_route;'
+			'DROP TABLE if EXISTS wiki_bus_routes;'
 		);
 
 		await theMySqlDb.execSql (
-			'CREATE TABLE wiki_bus_route ( ' +
+			'CREATE TABLE wiki_bus_routes ( ' +
                 'route_pk int NOT NULL AUTO_INCREMENT, ' +
-                'osm_id int, ' +
                 'PRIMARY KEY (route_pk), ' +
+				'bus_ref varchar (256), ' +
 				'wiki_ref varchar (256), ' +
 				'wiki_name varchar (256), ' +
 				'wiki_comment varchar (' + this.#maxCommentSize + '), ' +
@@ -108,58 +112,69 @@ class WikiBusLoader {
 	async #uploadFileContent ( ) {
 		let rowFound = false;
 		let wikiRef = '';
+		let busRef = '';
 		let wikiName = '';
 		let wikiComment = '';
 		let wikiRelations = '';
-		let lineCounter = 0;
+		let rowLineCounter = 0;
+		let fileLineCounter = 0;
 		for ( const line of this.#fileContent ) {
+			fileLineCounter ++;
 			if ( '|}' === line ) { // end table
 				rowFound = false;
 			}
 			if ( '|----' === line ) { // new row
 				rowFound = true;
-				lineCounter = 0;
+				rowLineCounter = 0;
 			}
 			if ( rowFound ) {
-				switch ( lineCounter ) {
+				switch ( rowLineCounter ) {
 				case 0 :
 					break;
 				case 1 :
-					wikiRef = line;
+					wikiRef = line.replaceAll ( '\'', '\\\'' );
+					busRef = wikiRef.split ( '|' ).reverse ( )[ 0 ].trim ( );
 					break;
 				case 2 :
-					wikiName = line;
+					wikiName = line.replaceAll ( '\'', '\\\'' );
 					break;
 				case 3 :
-					wikiComment = line;
+					wikiComment = line.replaceAll ( '\'', '\\\'' );
 					break;
 				case 4 :
-					wikiRelations = line;
+					wikiRelations = line.replaceAll ( '\'', '\\\'' );
 					await theMySqlDb.execSql (
-						'insert into wiki_bus_route ( wiki_ref, wikiName, wiki_comment, wiki_relations ) values (' +
-						wikiRef + ', ' +
-						wikiName + ', ' +
-						wikiComment + ', ' +
-						wikiRelations + ', ' +
-						');'
+						'insert into wiki_bus_routes ( bus_ref, wiki_ref, wiki_name, wiki_comment, wiki_relations ) values (' +
+						'\'' + busRef + '\', ' +
+						'\'' + wikiRef + '\', ' +
+						'\'' + wikiName + '\', ' +
+						'\'' + wikiComment + '\', ' +
+						'\'' + wikiRelations + '\');'
 					);
 					break;
 				default :
-					console.error ( 'More than 4 lines found for a table row ' );
+					console.error ( 'More than 4 lines found for a table row at file line ' + fileLineCounter );
 					process.exit ( 1 );
 				}
 			}
-			lineCounter ++;
+			rowLineCounter ++;
 		}
 	}
 
+	/**
+    * Coming soon...
+   */
+
 	async start ( ) {
+		console.info ( 'Creating table wiki_bus_route' );
 		this.#loadFile ( );
-		if ( ! this.#controlFileContent ( ) ) {
-			process.exit ( 1 );
+		if ( this.#controlFileContent ( ) ) {
+			await this.#createTableWikiBusRoute ( );
+			await this.#uploadFileContent ( );
 		}
-		await this.#createTableWikiBusRoute ( );
-		await this.#uploadFileContent ( );
+		else {
+			console.error ( 'Errors found in the file wiki.txt' );
+		}
 	}
 }
 

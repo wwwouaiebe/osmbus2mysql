@@ -78,6 +78,7 @@ class OsmDataLoader {
 	 */
 
 	async fetchData ( ) {
+		console.info ( 'Fetching... please wait' );
 		await fetch (
 			'https://lz4.overpass-api.de/api/interpreter?data=[out:json][timeout:40];' +
 			'rel[network=TECL][operator=TEC]' +

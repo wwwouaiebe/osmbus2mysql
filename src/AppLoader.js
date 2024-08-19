@@ -1,5 +1,5 @@
 /*
-Copyright - 2023 - wwwouaiebe - Contact: https://www.ouaie.be/
+Copyright - 2024 - wwwouaiebe - Contact: https://www.ouaie.be/
 
 This  program is free software;
 you can redistribute it and/or modify it under the terms of the
@@ -28,6 +28,7 @@ import OsmDataLoader from './OsmDataLoader.js';
 import theMySqlDb from './MySqlDb.js';
 import DbDataLoader from './DbDataLoader.js';
 import WikiBusLoader from './WikiBusLoader.js';
+import WikiBusBuiler from './WikiBusBuilder.js';
 
 /* ------------------------------------------------------------------------------------------------------------------------- */
 /**
@@ -74,9 +75,9 @@ class AppLoader {
 							theConfig.loadOldWiki = argContent [ 1 ] || theConfig.loadOldWiki;
 						}
 						break;
-					case '--loasOsmBus' :
+					case '--loadOsmBus' :
 						if ( 'true' === argContent [ 1 ] ) {
-							theConfig.loasOsmBus = argContent [ 1 ] || theConfig.loasOsmBus;
+							theConfig.loadOsmBus = argContent [ 1 ] || theConfig.loadOsmBus;
 						}
 						break;
 					case '--createNewWiki' :
@@ -87,7 +88,7 @@ class AppLoader {
 					case '--all' :
 						if ( 'true' === argContent [ 1 ] ) {
 							theConfig.loadOldWiki = 'true';
-							theConfig.loasOsmBus = 'true';
+							theConfig.loadOsmBus = 'true';
 							theConfig.createNewWiki = 'true';
 						}
 						break;
@@ -125,24 +126,26 @@ class AppLoader {
 		// config
 		this.#createConfig ( options );
 
-		const startTime = process.hrtime.bigint ( );
-
 		console.info ( '\nStarting gtfs2mysql ...\n\n' );
 		await theMySqlDb.start ( );
 
-		if ( theConfig.loadOsmBus ) {
+		if ( theConfig.loadOsmBus || theConfig.createNewWiki ) {
 			await new OsmDataLoader ( ).fetchData ( );
 			await new DbDataLoader ( ).loadData ( );
 		}
 
-		if ( theConfig.loadOldWiki ) {
+		if ( theConfig.loadOldWiki || theConfig.createNewWiki ) {
 			await new WikiBusLoader ( ).start ( );
+		}
+
+		if ( theConfig.createNewWiki ) {
+			await new WikiBusBuiler ( ).buildWiki ( );
 		}
 
 		await theMySqlDb.end ( );
 
 		// end of the process
-		const deltaTime = process.hrtime.bigint ( ) - startTime;
+		const deltaTime = process.hrtime.bigint ( ) - theConfig.startTime [ 0 ];
 
 		/* eslint-disable-next-line no-magic-numbers */
 		const execTime = String ( deltaTime / 1000000000n ) + '.' + String ( deltaTime % 1000000000n ).substring ( 0, 3 );

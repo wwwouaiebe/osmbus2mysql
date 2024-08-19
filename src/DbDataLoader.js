@@ -23,7 +23,6 @@ Changes:
 /* ------------------------------------------------------------------------------------------------------------------------- */
 
 import theOsmData from './OsmData.js';
-import theConfig from './Config.js';
 import theMySqlDb from './MySqlDb.js';
 
 /* ------------------------------------------------------------------------------------------------------------------------- */
@@ -34,8 +33,25 @@ import theMySqlDb from './MySqlDb.js';
 
 class DbDataLoader {
 
+	/**
+	* Coming soon
+	@type {String}
+	 */
+
 	get #routeMasterTableName ( ) { return 'osm_bus_route_masters'; }
+
+	/**
+	* Coming soon
+	@type {String}
+	 */
+
 	get #routeTableName ( ) { return 'osm_bus_routes'; }
+
+	/**
+	* Coming soon
+	@param {Array} dataArray Coming soon
+	@param {String} tableName Coming soon
+	 */
 
 	async #createLinks ( dataArray, tableName ) {
 		await theMySqlDb.execSql (
@@ -54,6 +70,12 @@ class DbDataLoader {
 		}
 	}
 
+ 	/**
+	* Coming soon
+	@param {Array} dataArray Coming soon
+	@param {String} tableName Coming soon
+	 */
+
 	async fillTable ( dataArray, tableName ) {
 
 		for ( let counter = 0; counter < dataArray.length; counter ++ ) {
@@ -70,6 +92,12 @@ class DbDataLoader {
 
 		await theMySqlDb.execSql ( 'commit;' );
 	}
+
+ 	/**
+	* Coming soon
+	@param {Array} columnNames Coming soon
+	@param {String} tableName Coming soon
+	 */
 
 	async #createTable ( columnNames, tableName ) {
 		await theMySqlDb.execSql (
@@ -92,6 +120,11 @@ class DbDataLoader {
 		await theMySqlDb.execSql ( sqlString );
 	};
 
+ 	/**
+	* Coming soon
+	@param {Map} aMap Coming soon
+	 */
+
 	#searchTags ( aMap ) {
 		let tags = new Map ( );
 		aMap.forEach (
@@ -110,22 +143,27 @@ class DbDataLoader {
 	 */
 
 	async loadData ( ) {
+		console.info ( 'Creating table ' + this.#routeMasterTableName );
 		await this.#createTable (
 			this.#searchTags ( theOsmData.routeMasters ),
 			this.#routeMasterTableName
 		);
+		console.info ( 'Filling table ' + this.#routeMasterTableName );
 		await this.fillTable (
 			theOsmData.routeMasters,
 			this.#routeMasterTableName
 		);
+		console.info ( 'Creating table ' + this.#routeTableName );
 		await this.#createTable (
 			this.#searchTags ( theOsmData.routes ),
 			this.#routeTableName
 		);
+		console.info ( 'Filling table ' + this.#routeTableName );
 		await this.fillTable (
 			theOsmData.routes,
 			this.#routeTableName
 		);
+		console.info ( 'Creating links' );
 		await this.#createLinks (
 			theOsmData.routeMasters,
 			'osm_routes_links'

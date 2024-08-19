@@ -65,6 +65,11 @@ class OsmData {
 
 	platforms = new Map ( );
 
+	/**
+    * Coming soon...
+	* @type {Map}
+    */
+
 	stops = new Map ( );
 
 	/**

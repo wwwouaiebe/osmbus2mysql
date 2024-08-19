@@ -28,7 +28,8 @@
     "scripts": {
         "debug": "node node_modules/grunt/bin/grunt",
         "osmbus2mysql": "node ./src/index.js --loadOsmBus=true --dbName=osmbus",
-        "wikibus2mysql": "node ./src/index.js --loadOldWiki=true --dbName=osmbus"
+        "wikibus2mysql": "node ./src/index.js --loadOldWiki=true --dbName=osmbus",
+        "createNewWiki": "node ./src/index.js --createNewWiki=true --dbName=osmbus"
     },
     "author": "wwwouaiebe",
     "license": "GPL-3.0",
