@@ -32,6 +32,9 @@ import fs from 'fs';
 
 class WikiBusLoader {
 
+	// eslint-disable-next-line no-magic-numbers
+	get #maxCommentSize ( ) { return 4096; }
+
 	/**
      * The content of the wiki file
      * @type {String}
@@ -51,11 +54,36 @@ class WikiBusLoader {
     * Coming soon...
    */
 
+	#loadFile ( ) {
+		this.#fileContent = ( fs.readFileSync ( './wiki/wiki.txt', 'utf8' ) ).split ( /\r\n|\r|\n/ );
+	}
+
+	/**
+    * Coming soon...
+   */
+
+	#controlFileContent ( ) {
+		let lineCounter = 0;
+		let errorsFound = false;
+		this.#fileContent.forEach (
+			line => {
+				if ( this.#maxCommentSize < line.length ) {
+					lineCounter ++;
+					console.error ( 'The line ' + lineCounter + 'is too long' );
+					errorsFound = true;
+				}
+			}
+		);
+
+		return errorsFound;
+	}
+
+	/**
+    * Coming soon...
+   */
+
 	async #createTableWikiBusRoute ( ) {
-
 		console.info ( '\nCreation of table wiki_bus_route...' );
-
-		this.#fileContent = fs.readFileSync ( theConfig.wiki, 'utf8' );
 
 		await theMySqlDb.execSql (
 			'DROP TABLE if EXISTS wiki_bus_route;'
@@ -65,25 +93,73 @@ class WikiBusLoader {
 			'CREATE TABLE wiki_bus_route ( ' +
                 'route_pk int NOT NULL AUTO_INCREMENT, ' +
                 'osm_id int, ' +
-                'PRIMARY KEY (route_pk) );'
+                'PRIMARY KEY (route_pk), ' +
+				'wiki_ref varchar (256), ' +
+				'wiki_name varchar (256), ' +
+				'wiki_comment varchar (' + this.#maxCommentSize + '), ' +
+				'wiki_relations varchar (' + this.#maxCommentSize + ') );'
 		);
-
-		let relations = this.#fileContent.match ( /\d{1,}(?=}})/g );
-
-		let relCounter = 0;
-		for ( relCounter = 0; relCounter < relations.length; relCounter ++ ) {
-			await theMySqlDb.execSql (
-				'insert into wiki_bus_route ( osm_id ) values (' + relations [ relCounter ] + ');'
-			);
-		}
 	}
 
 	/**
     * Coming soon...
    */
 
+	async #uploadFileContent ( ) {
+		let rowFound = false;
+		let wikiRef = '';
+		let wikiName = '';
+		let wikiComment = '';
+		let wikiRelations = '';
+		let lineCounter = 0;
+		for ( const line of this.#fileContent ) {
+			if ( '|}' === line ) { // end table
+				rowFound = false;
+			}
+			if ( '|----' === line ) { // new row
+				rowFound = true;
+				lineCounter = 0;
+			}
+			if ( rowFound ) {
+				switch ( lineCounter ) {
+				case 0 :
+					break;
+				case 1 :
+					wikiRef = line;
+					break;
+				case 2 :
+					wikiName = line;
+					break;
+				case 3 :
+					wikiComment = line;
+					break;
+				case 4 :
+					wikiRelations = line;
+					await theMySqlDb.execSql (
+						'insert into wiki_bus_route ( wiki_ref, wikiName, wiki_comment, wiki_relations ) values (' +
+						wikiRef + ', ' +
+						wikiName + ', ' +
+						wikiComment + ', ' +
+						wikiRelations + ', ' +
+						');'
+					);
+					break;
+				default :
+					console.error ( 'More than 4 lines found for a table row ' );
+					process.exit ( 1 );
+				}
+			}
+			lineCounter ++;
+		}
+	}
+
 	async start ( ) {
+		this.#loadFile ( );
+		if ( ! this.#controlFileContent ( ) ) {
+			process.exit ( 1 );
+		}
 		await this.#createTableWikiBusRoute ( );
+		await this.#uploadFileContent ( );
 	}
 }
 

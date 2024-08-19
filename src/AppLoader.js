@@ -24,11 +24,10 @@ Changes:
 
 import process from 'process';
 import theConfig from './Config.js';
-import OsmBusLoader from './OsmBusLoader.js';
-import OsmBusStopLoader from './OsmBusStopLoader.js';
-import OsmStopPositionLoader from './OsmStopPositionLoader.js';
-import WikiBusLoader from './WikiBusLoader.js';
+import OsmDataLoader from './OsmDataLoader.js';
 import theMySqlDb from './MySqlDb.js';
+import DbDataLoader from './DbDataLoader.js';
+import WikiBusLoader from './WikiBusLoader.js';
 
 /* ------------------------------------------------------------------------------------------------------------------------- */
 /**
@@ -46,7 +45,7 @@ class AppLoader {
      * @type {String}
      */
 
-	static get #version ( ) { return 'v1.1.0'; }
+	static get #version ( ) { return 'v2.0.0'; }
 
 	/**
 	* Complete theConfig object from the app parameters
@@ -68,31 +67,28 @@ class AppLoader {
 						theConfig.srcDir = argContent [ 1 ] || theConfig.srcDir;
 						break;
 					case '--dbName' :
-						theConfig.dbName = argContent [ 1 ];
+						theConfig.dbName = argContent [ 1 ] || theConfig.dbName;
 						break;
-					case '--wiki' :
-						theConfig.wiki = argContent [ 1 ] || theConfig.wiki;
-						break;
-					case '--osmbus' :
+					case '--loadOldWiki' :
 						if ( 'true' === argContent [ 1 ] ) {
-							theConfig.osmBus = true;
+							theConfig.loadOldWiki = argContent [ 1 ] || theConfig.loadOldWiki;
 						}
 						break;
-					case '--osmbusstop' :
+					case '--loasOsmBus' :
 						if ( 'true' === argContent [ 1 ] ) {
-							theConfig.osmBusStop = true;
+							theConfig.loasOsmBus = argContent [ 1 ] || theConfig.loasOsmBus;
 						}
 						break;
-					case '--osmstopposition' :
+					case '--createNewWiki' :
 						if ( 'true' === argContent [ 1 ] ) {
-							theConfig.osmStopPosition = true;
+							theConfig.createNewWiki = argContent [ 1 ] || theConfig.createNewWiki;
 						}
 						break;
 					case '--all' :
 						if ( 'true' === argContent [ 1 ] ) {
-							theConfig.osmBus = true;
-							theConfig.osmBusStop = true;
-							theConfig.osmStopPosition = true;
+							theConfig.loadOldWiki = 'true';
+							theConfig.loasOsmBus = 'true';
+							theConfig.createNewWiki = 'true';
 						}
 						break;
 					case '--version' :
@@ -134,20 +130,13 @@ class AppLoader {
 		console.info ( '\nStarting gtfs2mysql ...\n\n' );
 		await theMySqlDb.start ( );
 
-		if ( '' !== theConfig.wiki ) {
-			await ( new WikiBusLoader ( ).start ( ) );
+		if ( theConfig.loadOsmBus ) {
+			await new OsmDataLoader ( ).fetchData ( );
+			await new DbDataLoader ( ).loadData ( );
 		}
 
-		if ( theConfig.osmBus ) {
-			await ( new OsmBusLoader ( ).start ( ) );
-		}
-
-		if ( theConfig.osmBusStop ) {
-			await ( new OsmBusStopLoader ( ).start ( ) );
-		}
-
-		if ( theConfig.osmStopPosition ) {
-			await ( new OsmStopPositionLoader ( ).start ( ) );
+		if ( theConfig.loadOldWiki ) {
+			await new WikiBusLoader ( ).start ( );
 		}
 
 		await theMySqlDb.end ( );

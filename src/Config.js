@@ -56,32 +56,32 @@ class Config {
 	 * @type {boolean}
 	 */
 
-	wiki;
+	loadOldWiki;
 
 	/**
 	 * True when osm buses must be loaded
 	 * @type {string}
 	 */
 
-	osmBus;
+	loadOsmBus;
 
 	/**
-	 * True when osm buses stops must be loaded
+	 * True when a new wiki must be created
 	 * @type {string}
 	 */
 
-	osmBusStop;
+	createNewWiki;
 
 	/**
-	 * True when osm stop positions must be loaded
+	 * Coming soon
 	 * @type {string}
 	 */
 
-	osmStopPosition;
+	osmType;
 
 	/**
-	 * Comng soon...
-	 * @type {Number}
+	 * Coming soon
+	 * @type {number}
 	 */
 
 	// eslint-disable-next-line no-magic-numbers
@@ -95,10 +95,10 @@ class Config {
 		this.srcDir = '';
 		this.appDir = '';
 		this.dbName = '';
-		this.wiki = '';
-		this.osmBus = false;
-		this.osmBusStop = false;
-		this.osmStopPosition = false;
+		this.loadOldWiki = false;
+		this.loadOsmBus = false;
+		this.createNewWiki = false;
+		this.osmType = 'route';
 	}
 
 }
