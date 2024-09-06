@@ -24,6 +24,7 @@ Changes:
 
 import theOsmData from './OsmData.js';
 import theMySqlDb from './MySqlDb.js';
+import theConfig from './Config.js';
 
 /* ------------------------------------------------------------------------------------------------------------------------- */
 /**
@@ -46,6 +47,13 @@ class DbDataLoader {
 	 */
 
 	get #routeTableName ( ) { return 'osm_bus_routes'; }
+
+	/**
+	* Coming soon
+	@type {String}
+	 */
+
+	get #stopsTableName ( ) { return 'osm_bus_stops'; }
 
 	/**
 	* Coming soon
@@ -84,7 +92,7 @@ class DbDataLoader {
 			let sqlValues = data.id;
 			for ( const [ key, value ] of Object.entries ( data.tags ) ) {
 				sqlString += ', osm_' + key.replaceAll ( ':', '_' );
-				sqlValues += ', "' + value + '"';
+				sqlValues += ', "' + value.replaceAll ( '"', '' ) + '"';
 			};
 			sqlString += ') values (' + sqlValues + ');';
 			await theMySqlDb.execSql ( sqlString );
@@ -112,7 +120,7 @@ class DbDataLoader {
 
 		columnNames.forEach (
 			columnName => {
-				sqlString += ', ' + 'osm_' + columnName.replaceAll ( ':', '_' ) + ' varchar(256) ';
+				sqlString += ', ' + 'osm_' + columnName.replaceAll ( ':', '_' ) + ' varchar(128) ';
 			}
 		);
 		sqlString += ');';
@@ -143,31 +151,45 @@ class DbDataLoader {
 	 */
 
 	async loadData ( ) {
-		console.info ( 'Creating table ' + this.#routeMasterTableName );
-		await this.#createTable (
-			this.#searchTags ( theOsmData.routeMasters ),
-			this.#routeMasterTableName
-		);
-		console.info ( 'Filling table ' + this.#routeMasterTableName );
-		await this.fillTable (
-			theOsmData.routeMasters,
-			this.#routeMasterTableName
-		);
-		console.info ( 'Creating table ' + this.#routeTableName );
-		await this.#createTable (
-			this.#searchTags ( theOsmData.routes ),
-			this.#routeTableName
-		);
-		console.info ( 'Filling table ' + this.#routeTableName );
-		await this.fillTable (
-			theOsmData.routes,
-			this.#routeTableName
-		);
-		console.info ( 'Creating links' );
-		await this.#createLinks (
-			theOsmData.routeMasters,
-			'osm_routes_links'
-		);
+		if ( theConfig.loadOsmBus ) {
+			console.info ( 'Creating table ' + this.#routeMasterTableName );
+			await this.#createTable (
+				this.#searchTags ( theOsmData.routeMasters ),
+				this.#routeMasterTableName
+			);
+			console.info ( 'Filling table ' + this.#routeMasterTableName );
+			await this.fillTable (
+				theOsmData.routeMasters,
+				this.#routeMasterTableName
+			);
+			console.info ( 'Creating table ' + this.#routeTableName );
+			await this.#createTable (
+				this.#searchTags ( theOsmData.routes ),
+				this.#routeTableName
+			);
+			console.info ( 'Filling table ' + this.#routeTableName );
+			await this.fillTable (
+				theOsmData.routes,
+				this.#routeTableName
+			);
+			console.info ( 'Creating links' );
+			await this.#createLinks (
+				theOsmData.routeMasters,
+				'osm_routes_links'
+			);
+		}
+		if ( theConfig.loadOsmBusStop ) {
+			console.info ( 'Creating table ' + this.#stopsTableName );
+			await this.#createTable (
+				this.#searchTags ( theOsmData.stops ),
+				this.#stopsTableName
+			);
+			console.info ( 'Filling table ' + this.#stopsTableName );
+			await this.fillTable (
+				theOsmData.stops,
+				this.#stopsTableName
+			);
+		}
 	}
 
 	/**

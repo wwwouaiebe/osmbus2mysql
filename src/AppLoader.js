@@ -29,6 +29,7 @@ import theMySqlDb from './MySqlDb.js';
 import DbDataLoader from './DbDataLoader.js';
 import WikiBusLoader from './WikiBusLoader.js';
 import WikiBusBuiler from './WikiBusBuilder.js';
+import theOsmData from './OsmData.js';
 
 /* ------------------------------------------------------------------------------------------------------------------------- */
 /**
@@ -78,6 +79,11 @@ class AppLoader {
 					case '--loadOsmBus' :
 						if ( 'true' === argContent [ 1 ] ) {
 							theConfig.loadOsmBus = argContent [ 1 ] || theConfig.loadOsmBus;
+						}
+						break;
+					case '--loadOsmBusStop' :
+						if ( 'true' === argContent [ 1 ] ) {
+							theConfig.loadOsmBusStop = argContent [ 1 ] || theConfig.loadOsmBusStop;
 						}
 						break;
 					case '--createNewWiki' :
@@ -130,7 +136,28 @@ class AppLoader {
 		await theMySqlDb.start ( );
 
 		if ( theConfig.loadOsmBus || theConfig.createNewWiki ) {
-			await new OsmDataLoader ( ).fetchData ( );
+
+			let uri = 'https://lz4.overpass-api.de/api/interpreter?data=[out:json][timeout:40];' +
+			'rel[network=TECL][operator=TEC]' +
+			'[type="' + theConfig.osmType + '"]->.rou;' +
+			'(.rou <<; - .rou;); >> ->.rm;.rm out;';
+
+			theOsmData.clear ( );
+			await new OsmDataLoader ( ).fetchData ( uri );
+			await new DbDataLoader ( ).loadData ( );
+		}
+
+		if ( theConfig.loadOsmBusStop ) {
+
+			/*
+			let uri = 'https://lz4.overpass-api.de/api/interpreter?data=[out:json][timeout:40];' +
+			'node[network=TECL][highway=bus_stop]; out;';
+			*/
+
+			let uri = 'https://lz4.overpass-api.de/api/interpreter?data=[out:json][timeout:40];' +
+				'node(area:3601407192)[highway=bus_stop];%20out;';
+			theOsmData.clear ( );
+			await new OsmDataLoader ( ).fetchData ( uri );
 			await new DbDataLoader ( ).loadData ( );
 		}
 

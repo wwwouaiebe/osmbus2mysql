@@ -23,7 +23,6 @@ Changes:
 /* ------------------------------------------------------------------------------------------------------------------------- */
 
 import theOsmData from './OsmData.js';
-import theConfig from './Config.js';
 
 /* ------------------------------------------------------------------------------------------------------------------------- */
 /**
@@ -62,9 +61,19 @@ class OsmDataLoader {
 					break;
 				case 'way' :
 					theOsmData.ways.set ( element.id, element );
+
+					/*
+					if ( 'platform' === element?.tags?.highway ) {
+						theOsmData.stops.push ( element );
+					}
+						*/
+
 					break;
 				case 'node' :
 					theOsmData.nodes.set ( element.id, element );
+					if ( 'bus_stop' === element?.tags?.highway ) {
+						theOsmData.stops.push ( element );
+					}
 					break;
 				default :
 					break;
@@ -74,17 +83,14 @@ class OsmDataLoader {
 	}
 
 	/**
-	* Coming soon
+	 * Coming soon
+	 * @param {String} uri Coming soon
 	 */
 
-	async fetchData ( ) {
+	async fetchData ( uri ) {
 		console.info ( 'Fetching... please wait' );
-		await fetch (
-			'https://lz4.overpass-api.de/api/interpreter?data=[out:json][timeout:40];' +
-			'rel[network=TECL][operator=TEC]' +
-			'[type="' + theConfig.osmType + '"]->.rou;' +
-			'(.rou <<; - .rou;); >> ->.rm;.rm out;'
-		)
+
+		await fetch ( uri )
 			.then (
 				response => {
 					if ( response.ok ) {

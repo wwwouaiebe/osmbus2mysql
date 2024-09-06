@@ -63,21 +63,34 @@ class OsmData {
 	 * @type {Map}
 	 */
 
-	platforms = new Map ( );
+	platforms = [];
 
 	/**
     * Coming soon...
 	* @type {Map}
     */
 
-	stops = new Map ( );
+	stops = [];
 
 	/**
 	 * The constructor
 	 */
 
 	constructor ( ) {
-		Object.freeze ( this );
+		Object.seal ( this );
+	}
+
+	/**
+	 * Clean the data, removing everything from maps and arrays
+	 */
+
+	clear ( ) {
+		this.routeMasters = [];
+		this.routes = [];
+		this.ways.clear ( );
+		this.nodes.clear ( );
+		this.platforms = [];
+		this.stops = [];
 	}
 
 }

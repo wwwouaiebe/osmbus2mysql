@@ -73,6 +73,13 @@ class Config {
 	loadOsmBus;
 
 	/**
+	 * True when osm bus stops must be loaded
+	 * @type {string}
+	 */
+
+	loadOsmBusStop;
+
+	/**
 	 * True when a new wiki must be created
 	 * @type {string}
 	 */
@@ -104,6 +111,7 @@ class Config {
 		this.dbName = '';
 		this.loadOldWiki = false;
 		this.loadOsmBus = false;
+		this.loadOsmBusStop = false;
 		this.createNewWiki = false;
 		this.osmType = 'route';
 	}
