@@ -84,7 +84,7 @@ class DbDataLoader {
 	@param {String} tableName Coming soon
 	 */
 
-	async fillTable ( dataArray, tableName ) {
+	async #fillTable ( dataArray, tableName ) {
 
 		for ( let counter = 0; counter < dataArray.length; counter ++ ) {
 			let data = dataArray [ counter ];
@@ -151,14 +151,14 @@ class DbDataLoader {
 	 */
 
 	async loadData ( ) {
-		if ( theConfig.loadOsmBus ) {
+		if ( theConfig.loadOsmBus || theConfig.createNewWiki ) {
 			console.info ( 'Creating table ' + this.#routeMasterTableName );
 			await this.#createTable (
 				this.#searchTags ( theOsmData.routeMasters ),
 				this.#routeMasterTableName
 			);
 			console.info ( 'Filling table ' + this.#routeMasterTableName );
-			await this.fillTable (
+			await this.#fillTable (
 				theOsmData.routeMasters,
 				this.#routeMasterTableName
 			);
@@ -168,7 +168,7 @@ class DbDataLoader {
 				this.#routeTableName
 			);
 			console.info ( 'Filling table ' + this.#routeTableName );
-			await this.fillTable (
+			await this.#fillTable (
 				theOsmData.routes,
 				this.#routeTableName
 			);
@@ -185,7 +185,7 @@ class DbDataLoader {
 				this.#stopsTableName
 			);
 			console.info ( 'Filling table ' + this.#stopsTableName );
-			await this.fillTable (
+			await this.#fillTable (
 				theOsmData.stops,
 				this.#stopsTableName
 			);

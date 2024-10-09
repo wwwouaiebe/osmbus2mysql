@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 /*
 Copyright - 2024 - wwwouaiebe - Contact: https://www.ouaie.be/
 
@@ -86,6 +87,11 @@ class AppLoader {
 							theConfig.loadOsmBusStop = argContent [ 1 ] || theConfig.loadOsmBusStop;
 						}
 						break;
+					case '--loadOsmBusStopAllNetworks' :
+						if ( 'true' === argContent [ 1 ] ) {
+							theConfig.loadOsmBusStopAllNetworks = argContent [ 1 ] || theConfig.loadOsmBusStopAllNetworks;
+						}
+						break;
 					case '--createNewWiki' :
 						if ( 'true' === argContent [ 1 ] ) {
 							theConfig.createNewWiki = argContent [ 1 ] || theConfig.createNewWiki;
@@ -149,13 +155,23 @@ class AppLoader {
 
 		if ( theConfig.loadOsmBusStop ) {
 
+			let uri = '';
+			if ( theConfig.loadOsmBusStopAllNetworks ) {
+
+				// Liège Province
+				uri = 'https://lz4.overpass-api.de/api/interpreter?data=[out:json][timeout:40];' +
+					'node(area:3601407192)[highway=bus_stop];out;';
+			}
+			else {
+
+				// TECL but some bad results ...
+				uri = 'https://lz4.overpass-api.de/api/interpreter?data=[out:json][timeout:40];' +
+					'node["network"~"\w*TECL\w*"][highway=bus_stop];out;';
+			}
+
 			/*
-			let uri = 'https://lz4.overpass-api.de/api/interpreter?data=[out:json][timeout:40];' +
-			'node[network=TECL][highway=bus_stop]; out;';
 			*/
 
-			let uri = 'https://lz4.overpass-api.de/api/interpreter?data=[out:json][timeout:40];' +
-				'node(area:3601407192)[highway=bus_stop];%20out;';
 			theOsmData.clear ( );
 			await new OsmDataLoader ( ).fetchData ( uri );
 			await new DbDataLoader ( ).loadData ( );

@@ -87,6 +87,13 @@ class Config {
 	createNewWiki;
 
 	/**
+	 * True when all bus_stop have to be loaded
+	 * @type {string}
+	 */
+
+	loadOsmBusStopAllNetworks;
+
+	/**
 	 * Coming soon
 	 * @type {string}
 	 */
@@ -112,6 +119,7 @@ class Config {
 		this.loadOldWiki = false;
 		this.loadOsmBus = false;
 		this.loadOsmBusStop = false;
+		this.loadOsmBusStopAllNetworks = false;
 		this.createNewWiki = false;
 		this.osmType = 'route';
 	}
