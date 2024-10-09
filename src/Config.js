@@ -31,6 +31,13 @@ Changes:
 class Config {
 
 	/**
+	* Coming soon
+	@type {Array}
+	 */
+
+	startTime = [];
+
+	/**
 	 * The path to the directory where the gtfs files are
 	 * @type {String}
 	 */
@@ -56,32 +63,46 @@ class Config {
 	 * @type {boolean}
 	 */
 
-	wiki;
+	loadOldWiki;
 
 	/**
 	 * True when osm buses must be loaded
 	 * @type {string}
 	 */
 
-	osmBus;
+	loadOsmBus;
 
 	/**
-	 * True when osm buses stops must be loaded
+	 * True when osm bus stops must be loaded
 	 * @type {string}
 	 */
 
-	osmBusStop;
+	loadOsmBusStop;
 
 	/**
-	 * True when osm stop positions must be loaded
+	 * True when a new wiki must be created
 	 * @type {string}
 	 */
 
-	osmStopPosition;
+	createNewWiki;
 
 	/**
-	 * Comng soon...
-	 * @type {Number}
+	 * True when all bus_stop have to be loaded
+	 * @type {string}
+	 */
+
+	loadOsmBusStopAllNetworks;
+
+	/**
+	 * Coming soon
+	 * @type {string}
+	 */
+
+	osmType;
+
+	/**
+	 * Coming soon
+	 * @type {number}
 	 */
 
 	// eslint-disable-next-line no-magic-numbers
@@ -95,10 +116,12 @@ class Config {
 		this.srcDir = '';
 		this.appDir = '';
 		this.dbName = '';
-		this.wiki = '';
-		this.osmBus = false;
-		this.osmBusStop = false;
-		this.osmStopPosition = false;
+		this.loadOldWiki = false;
+		this.loadOsmBus = false;
+		this.loadOsmBusStop = false;
+		this.loadOsmBusStopAllNetworks = false;
+		this.createNewWiki = false;
+		this.osmType = 'route';
 	}
 
 }

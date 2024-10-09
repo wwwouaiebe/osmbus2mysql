@@ -1,5 +1,5 @@
 /*
-Copyright - 2023 - wwwouaiebe - Contact: https://www.ouaie.be/
+Copyright - 2024 - wwwouaiebe - Contact: https://www.ouaie.be/
 
 This  program is free software;
 you can redistribute it and/or modify it under the terms of the
@@ -22,35 +22,86 @@ Changes:
 */
 /* ------------------------------------------------------------------------------------------------------------------------- */
 
-import OsmLoader from './OsmLoader.js';
-
 /* ------------------------------------------------------------------------------------------------------------------------- */
 /**
- * Coming soon...
+ * Coming soon
  */
 /* ------------------------------------------------------------------------------------------------------------------------- */
 
-class OsmBusStopLoader extends OsmLoader {
+class OsmData {
 
 	/**
-     * The constructor
-     */
+	 * Coming soon
+	 * @type {Array}
+	 */
+
+	routeMasters = [];
+
+	/**
+	 * Coming soon
+	 * @type {Array}
+	 */
+
+	routes = [];
+
+	/**
+	 * Coming soon
+	 * @type {Map}
+	 */
+
+	ways = new Map ( );
+
+	/**
+	 * Coming soon
+	 * @type {Map}
+	 */
+
+	nodes = new Map ( );
+
+	/**
+	 * Coming soon
+	 * @type {Map}
+	 */
+
+	platforms = [];
+
+	/**
+    * Coming soon...
+	* @type {Map}
+    */
+
+	stops = [];
+
+	/**
+	 * The constructor
+	 */
 
 	constructor ( ) {
-		super ( );
-		Object.freeze ( this );
-
-		// 3601407192 province Liège
-		// 3602377747 anthisnes
-		this.loadData.query =
-			'https://lz4.overpass-api.de/api/interpreter?data=[out:json][timeout:40];' +
-			'nw(area:3601407192)' +
-			'[highway=bus_stop]' +
-			';out;';
-		this.loadData.tableName = 'osm_bus_stop';
+		Object.seal ( this );
 	}
+
+	/**
+	 * Clean the data, removing everything from maps and arrays
+	 */
+
+	clear ( ) {
+		this.routeMasters = [];
+		this.routes = [];
+		this.ways.clear ( );
+		this.nodes.clear ( );
+		this.platforms = [];
+		this.stops = [];
+	}
+
 }
 
-export default OsmBusStopLoader;
+/**
+ * Coming soon
+ * @type {Object}
+ */
+
+let theOsmData = new OsmData ( );
+
+export default theOsmData;
 
 /* --- End of file --------------------------------------------------------------------------------------------------------- */

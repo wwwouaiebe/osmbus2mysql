@@ -1,5 +1,6 @@
+/* eslint-disable complexity */
 /*
-Copyright - 2023 - wwwouaiebe - Contact: https://www.ouaie.be/
+Copyright - 2024 - wwwouaiebe - Contact: https://www.ouaie.be/
 
 This  program is free software;
 you can redistribute it and/or modify it under the terms of the
@@ -24,11 +25,12 @@ Changes:
 
 import process from 'process';
 import theConfig from './Config.js';
-import OsmBusLoader from './OsmBusLoader.js';
-import OsmBusStopLoader from './OsmBusStopLoader.js';
-import OsmStopPositionLoader from './OsmStopPositionLoader.js';
-import WikiBusLoader from './WikiBusLoader.js';
+import OsmDataLoader from './OsmDataLoader.js';
 import theMySqlDb from './MySqlDb.js';
+import DbDataLoader from './DbDataLoader.js';
+import WikiBusLoader from './WikiBusLoader.js';
+import WikiBusBuiler from './WikiBusBuilder.js';
+import theOsmData from './OsmData.js';
 
 /* ------------------------------------------------------------------------------------------------------------------------- */
 /**
@@ -46,7 +48,7 @@ class AppLoader {
      * @type {String}
      */
 
-	static get #version ( ) { return 'v1.1.0'; }
+	static get #version ( ) { return 'v2.0.0'; }
 
 	/**
 	* Complete theConfig object from the app parameters
@@ -68,31 +70,38 @@ class AppLoader {
 						theConfig.srcDir = argContent [ 1 ] || theConfig.srcDir;
 						break;
 					case '--dbName' :
-						theConfig.dbName = argContent [ 1 ];
+						theConfig.dbName = argContent [ 1 ] || theConfig.dbName;
 						break;
-					case '--wiki' :
-						theConfig.wiki = argContent [ 1 ] || theConfig.wiki;
-						break;
-					case '--osmbus' :
+					case '--loadOldWiki' :
 						if ( 'true' === argContent [ 1 ] ) {
-							theConfig.osmBus = true;
+							theConfig.loadOldWiki = argContent [ 1 ] || theConfig.loadOldWiki;
 						}
 						break;
-					case '--osmbusstop' :
+					case '--loadOsmBus' :
 						if ( 'true' === argContent [ 1 ] ) {
-							theConfig.osmBusStop = true;
+							theConfig.loadOsmBus = argContent [ 1 ] || theConfig.loadOsmBus;
 						}
 						break;
-					case '--osmstopposition' :
+					case '--loadOsmBusStop' :
 						if ( 'true' === argContent [ 1 ] ) {
-							theConfig.osmStopPosition = true;
+							theConfig.loadOsmBusStop = argContent [ 1 ] || theConfig.loadOsmBusStop;
+						}
+						break;
+					case '--loadOsmBusStopAllNetworks' :
+						if ( 'true' === argContent [ 1 ] ) {
+							theConfig.loadOsmBusStopAllNetworks = argContent [ 1 ] || theConfig.loadOsmBusStopAllNetworks;
+						}
+						break;
+					case '--createNewWiki' :
+						if ( 'true' === argContent [ 1 ] ) {
+							theConfig.createNewWiki = argContent [ 1 ] || theConfig.createNewWiki;
 						}
 						break;
 					case '--all' :
 						if ( 'true' === argContent [ 1 ] ) {
-							theConfig.osmBus = true;
-							theConfig.osmBusStop = true;
-							theConfig.osmStopPosition = true;
+							theConfig.loadOldWiki = 'true';
+							theConfig.loadOsmBus = 'true';
+							theConfig.createNewWiki = 'true';
 						}
 						break;
 					case '--version' :
@@ -129,31 +138,57 @@ class AppLoader {
 		// config
 		this.#createConfig ( options );
 
-		const startTime = process.hrtime.bigint ( );
-
 		console.info ( '\nStarting gtfs2mysql ...\n\n' );
 		await theMySqlDb.start ( );
 
-		if ( '' !== theConfig.wiki ) {
-			await ( new WikiBusLoader ( ).start ( ) );
+		if ( theConfig.loadOsmBus || theConfig.createNewWiki ) {
+
+			let uri = 'https://lz4.overpass-api.de/api/interpreter?data=[out:json][timeout:40];' +
+			'rel[network=TECL][operator=TEC]' +
+			'[type="' + theConfig.osmType + '"]->.rou;' +
+			'(.rou <<; - .rou;); >> ->.rm;.rm out;';
+
+			theOsmData.clear ( );
+			await new OsmDataLoader ( ).fetchData ( uri );
+			await new DbDataLoader ( ).loadData ( );
 		}
 
-		if ( theConfig.osmBus ) {
-			await ( new OsmBusLoader ( ).start ( ) );
+		if ( theConfig.loadOsmBusStop ) {
+
+			let uri = '';
+			if ( theConfig.loadOsmBusStopAllNetworks ) {
+
+				// Liège Province
+				uri = 'https://lz4.overpass-api.de/api/interpreter?data=[out:json][timeout:40];' +
+					'node(area:3601407192)[highway=bus_stop];out;';
+			}
+			else {
+
+				// TECL but some bad results ...
+				uri = 'https://lz4.overpass-api.de/api/interpreter?data=[out:json][timeout:40];' +
+					'node["network"~"\w*TECL\w*"][highway=bus_stop];out;';
+			}
+
+			/*
+			*/
+
+			theOsmData.clear ( );
+			await new OsmDataLoader ( ).fetchData ( uri );
+			await new DbDataLoader ( ).loadData ( );
 		}
 
-		if ( theConfig.osmBusStop ) {
-			await ( new OsmBusStopLoader ( ).start ( ) );
+		if ( theConfig.loadOldWiki || theConfig.createNewWiki ) {
+			await new WikiBusLoader ( ).start ( );
 		}
 
-		if ( theConfig.osmStopPosition ) {
-			await ( new OsmStopPositionLoader ( ).start ( ) );
+		if ( theConfig.createNewWiki ) {
+			await new WikiBusBuiler ( ).buildWiki ( );
 		}
 
 		await theMySqlDb.end ( );
 
 		// end of the process
-		const deltaTime = process.hrtime.bigint ( ) - startTime;
+		const deltaTime = process.hrtime.bigint ( ) - theConfig.startTime [ 0 ];
 
 		/* eslint-disable-next-line no-magic-numbers */
 		const execTime = String ( deltaTime / 1000000000n ) + '.' + String ( deltaTime % 1000000000n ).substring ( 0, 3 );

@@ -6,7 +6,7 @@
     "bin": {
         "sd": "./src/index.js"
     },
-    "version": "1.0.0",
+    "version": "2.0.0",
     "keywords": [],
     "devDependencies": {
         "eslint": "latest",
@@ -27,10 +27,10 @@
     },
     "scripts": {
         "debug": "node node_modules/grunt/bin/grunt",
-        "osmbus2mysql": "node ./src/index.js --osmbus=true --dbName=osmbus",
-        "osmbusstop2mysql": "node ./src/index.js --osmbusstop=true --dbName=osmbus",
-        "osmstopposition2mysql": "node ./src/index.js --osmstopposition=true --dbName=osmbus",
-        "wiki2mysql": "node ./src/index.js --wiki=./wiki/wiki.txt --osmbus=true --dbName=osmbus"
+        "osmbus2mysql": "node ./src/index.js --loadOsmBus=true --dbName=osmbus",
+        "osmbusstop2mysql": "node ./src/index.js --loadOsmBusStop=true --dbName=osmbus",
+        "wikibus2mysql": "node ./src/index.js --loadOldWiki=true --dbName=osmbus",
+        "createNewWiki": "node ./src/index.js --createNewWiki=true --dbName=osmbus"
     },
     "author": "wwwouaiebe",
     "license": "GPL-3.0",
