@@ -30,7 +30,8 @@
         "osmbus2mysql": "node ./src/index.js --loadOsmBus=true --dbName=osmbus",
         "osmbusstop2mysql": "node ./src/index.js --loadOsmBusStop=true --dbName=osmbus",
         "wikibus2mysql": "node ./src/index.js --loadOldWiki=true --dbName=osmbus",
-        "createNewWiki": "node ./src/index.js --createNewWiki=true --dbName=osmbus"
+        "createNewWikiTECL": "node ./src/index.js --createNewWiki=true --dbName=osmbus --operator=TEC --network=TECL",
+        "createNewWikiTECX": "node ./src/index.js --createNewWiki=true --dbName=osmbus --operator=TEC --network=TECX"
     },
     "author": "wwwouaiebe",
     "license": "GPL-3.0",

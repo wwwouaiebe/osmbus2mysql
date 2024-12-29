@@ -31,6 +31,7 @@ import DbDataLoader from './DbDataLoader.js';
 import WikiBusLoader from './WikiBusLoader.js';
 import WikiBusBuiler from './WikiBusBuilder.js';
 import theOsmData from './OsmData.js';
+import theOperator from './Operator.js';
 
 /* ------------------------------------------------------------------------------------------------------------------------- */
 /**
@@ -71,6 +72,12 @@ class AppLoader {
 						break;
 					case '--dbName' :
 						theConfig.dbName = argContent [ 1 ] || theConfig.dbName;
+						break;
+					case '--network' :
+						theConfig.network = argContent [ 1 ] || theConfig.network;
+						break;
+					case '--operator' :
+						theConfig.operator = argContent [ 1 ] || theConfig.operator;
 						break;
 					case '--loadOldWiki' :
 						if ( 'true' === argContent [ 1 ] ) {
@@ -137,21 +144,12 @@ class AppLoader {
 
 		// config
 		this.#createConfig ( options );
+		await theOperator.loadData ( );
+		let network = theOperator.getNetwork ( theConfig.network );
 
 		console.info ( '\nStarting gtfs2mysql ...\n\n' );
+
 		await theMySqlDb.start ( );
-
-		if ( theConfig.loadOsmBus || theConfig.createNewWiki ) {
-
-			let uri = 'https://lz4.overpass-api.de/api/interpreter?data=[out:json][timeout:40];' +
-			'rel[network=TECL][operator=TEC]' +
-			'[type="' + theConfig.osmType + '"]->.rou;' +
-			'(.rou <<; - .rou;); >> ->.rm;.rm out;';
-
-			theOsmData.clear ( );
-			await new OsmDataLoader ( ).fetchData ( uri );
-			await new DbDataLoader ( ).loadData ( );
-		}
 
 		if ( theConfig.loadOsmBusStop ) {
 
@@ -169,8 +167,17 @@ class AppLoader {
 					'node["network"~"\w*TECL\w*"][highway=bus_stop];out;';
 			}
 
-			/*
-			*/
+			theOsmData.clear ( );
+			await new OsmDataLoader ( ).fetchData ( uri );
+			await new DbDataLoader ( ).loadData ( );
+		}
+
+		if ( theConfig.loadOsmBus || theConfig.createNewWiki ) {
+			let uri = 'https://lz4.overpass-api.de/api/interpreter?data=[out:json][timeout:40];' +
+			'rel[network=' + theConfig.network + ']' +
+			'[operator=' + theConfig.operator + ']' +
+			'[type="' + theConfig.osmType + '"]->.rou;' +
+			'(.rou <<; - .rou;); >> ->.rm;.rm out;';
 
 			theOsmData.clear ( );
 			await new OsmDataLoader ( ).fetchData ( uri );
@@ -190,7 +197,7 @@ class AppLoader {
 		// end of the process
 		const deltaTime = process.hrtime.bigint ( ) - theConfig.startTime [ 0 ];
 
-		/* eslint-disable-next-line no-magic-numbers */
+		// eslint-disable-next-line no-magic-numbers
 		const execTime = String ( deltaTime / 1000000000n ) + '.' + String ( deltaTime % 1000000000n ).substring ( 0, 3 );
 
 		console.info ( `\nFiles generated in ${execTime} seconds.` );

@@ -22,8 +22,10 @@ Changes:
 */
 /* ------------------------------------------------------------------------------------------------------------------------- */
 
+import theConfig from './Config.js';
 import theMySqlDb from './MySqlDb.js';
 import fs from 'fs';
+import theOperator from './Operator.js';
 
 /* ------------------------------------------------------------------------------------------------------------------------- */
 /**
@@ -40,6 +42,8 @@ class WikiBusBuiler {
 
 	#gtfsBusRoutes = [];
 
+	#network;
+
 	/**
 	* Coming soon
 	 */
@@ -48,8 +52,29 @@ class WikiBusBuiler {
 		this.#gtfsBusRoutes = await theMySqlDb.execSql (
 			'SELECT distinct gtfs_tec.routes.route_short_name AS routeRef, route_long_name AS routeLongName ' +
             'FROM gtfs_tec.routes ' +
-            'WHERE agency_id = "L" ' +
+            'WHERE agency_id = "' + this.#network.gtfsAgencyId + '" ' +
+			'AND route_id like "' + this.#network.idPrefix + '%" ' +
             'ORDER BY LPAD ( gtfs_tec.routes.route_short_name, 5, " ");'
+		);
+		this.#gtfsBusRoutes.sort (
+			( first, second ) => {
+
+				// split the name into the numeric part and the alphanumeric part:
+				// numeric part
+				let firstPrefix = String ( Number.parseInt ( first.routeRef ) );
+				let secondPrefix = String ( Number.parseInt ( second.routeRef ) );
+
+				// alpha numeric part
+				let firstPostfix = ( first.routeRef ?? '' ).replace ( firstPrefix, '' );
+				let secondPostfix = ( second.routeRef ?? '' ).replace ( secondPrefix, '' );
+
+				// complete the numeric part with spaces on the left and compare
+				let result =
+					( firstPrefix.padStart ( 5, ' ' ) + firstPostfix )
+						.localeCompare ( secondPrefix.padStart ( 5, ' ' ) + secondPostfix );
+
+				return result;
+			}
 		);
 	}
 
@@ -81,12 +106,15 @@ class WikiBusBuiler {
 		if ( 0 === results.length ) {
 			return '|';
 		}
-		let wikiTextRelations = '| {{relation|' + results[ 0 ].osmRouteMasterId + '}} route_master ';
+		let wikiTextRelations = '| {{relation|' + results[ 0 ].osmRouteMasterId + '}} route_master and ' +
+		String ( results.length ) + ' route relations';
+		/*
 		results.forEach (
 			result => {
 				wikiTextRelations += '<br/>{{relation|' + result.osmRouteId + '}} ' + result.osmRouteName;
 			}
 		);
+		*/
 
 		return wikiTextRelations;
 
@@ -99,7 +127,8 @@ class WikiBusBuiler {
 	async #controlWiki ( ) {
 		const results = await theMySqlDb.execSql (
 			'SELECT DISTINCT gtfs_tec.routes.route_short_name, route_long_name FROM gtfs_tec.routes ' +
-            'WHERE agency_id="L" ' +
+            'WHERE agency_id="' + this.#network.gtfsAgencyId + '" ' +
+			'AND route_id like "%' + this.#network.idPrefix + '" ' +
             'AND gtfs_tec.routes.route_short_name NOT IN ' +
             '( SELECT osmbus.wiki_bus_routes.bus_ref FROM osmbus.wiki_bus_routes);'
 		);
@@ -148,6 +177,7 @@ class WikiBusBuiler {
  	 */
 
 	async buildWiki ( ) {
+		this.#network = theOperator.getNetwork ( theConfig.network );
 		await this.#controlWiki ( );
 		await this.#searchGTFSBusRef ( );
 		let wikiText = '';
@@ -159,7 +189,7 @@ class WikiBusBuiler {
 			wikiText += await this.#getWikiComment ( gtfsBusRoute.routeRef ) + '\n';
 			wikiText += await this.#getWikiTextRelations ( gtfsBusRoute.routeRef ) + '\n';
 		}
- 		fs.writeFileSync ( './wiki/newWiki.txt', wikiText );
+ 		fs.writeFileSync ( './wiki/newWiki' + theConfig.network + '.txt', wikiText );
 	}
 
 	/**

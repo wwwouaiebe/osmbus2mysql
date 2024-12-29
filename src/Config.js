@@ -102,6 +102,13 @@ class Config {
 
 	/**
 	 * Coming soon
+	 * @type {String}
+	 */
+
+	network;
+
+	/**
+	 * Coming soon
 	 * @type {number}
 	 */
 
@@ -116,6 +123,8 @@ class Config {
 		this.srcDir = '';
 		this.appDir = '';
 		this.dbName = '';
+		this.network = '';
+		this.operator = '';
 		this.loadOldWiki = false;
 		this.loadOsmBus = false;
 		this.loadOsmBusStop = false;

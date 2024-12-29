@@ -24,6 +24,7 @@ Changes:
 
 import theMySqlDb from './MySqlDb.js';
 import fs from 'fs';
+import theConfig from './Config.js';
 
 /**
     * Coming soon...
@@ -59,7 +60,8 @@ class WikiBusLoader {
    */
 
 	#loadFile ( ) {
-		this.#fileContent = ( fs.readFileSync ( './wiki/oldWiki.txt', 'utf8' ) ).split ( /\r\n|\r|\n/ );
+		this.#fileContent = ( fs.readFileSync ( './wiki/oldWiki' + theConfig.network + '.txt', 'utf8' ) )
+			.split ( /\r\n|\r|\n/ );
 	}
 
 	/**
