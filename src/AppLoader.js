@@ -164,7 +164,7 @@ class AppLoader {
 
 				// TECL but some bad results ...
 				uri = 'https://lz4.overpass-api.de/api/interpreter?data=[out:json][timeout:40];' +
-					'node["network"~"\w*TECL\w*"][highway=bus_stop];out;';
+					'node["network"~"\w*' + theConfig.network + '\w*"][highway=bus_stop];out;';
 			}
 
 			theOsmData.clear ( );
