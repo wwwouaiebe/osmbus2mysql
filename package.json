@@ -23,13 +23,16 @@
         "url": "git+https://github.com/wwwouaiebe/osmbus2mysql.git"
     },
     "engines": {
-        "node": ">=20.9.0"
+        "node": ">=22.14.0"
     },
     "scripts": {
         "debug": "node node_modules/grunt/bin/grunt",
-        "osmbus2mysql": "node ./src/index.js --loadOsmBus=true --dbName=osmbus",
+        "osmbus2mysqlTECL": "node ./src/index.js --loadOsmBus=true --dbName=osmbus --operator=TEC --network=TECL",
+        "osmbus2mysqlTECX": "node ./src/index.js --loadOsmBus=true --dbName=osmbus --operator=TEC --network=TECX",
         "osmbusstop2mysqlTECL": "node ./src/index.js --loadOsmBusStop=true --dbName=osmbus --operator=TEC --network=TECL",
+        "osmbusstop2mysqlTECN": "node ./src/index.js --loadOsmBusStop=true --dbName=osmbus --operator=TEC --network=TECN",
         "osmbusstop2mysqlTECX": "node ./src/index.js --loadOsmBusStop=true --dbName=osmbus --operator=TEC --network=TECX",
+        "osmbusstop2mysqlLiège": "node ./src/index.js --loadOsmBusStop=true --dbName=osmbus --loadOsmBusStopAllNetworks=true --operator=TEC",
         "wikibus2mysql": "node ./src/index.js --loadOldWiki=true --dbName=osmbus",
         "createNewWikiTECL": "node ./src/index.js --createNewWiki=true --dbName=osmbus --operator=TEC --network=TECL",
         "createNewWikiTECX": "node ./src/index.js --createNewWiki=true --dbName=osmbus --operator=TEC --network=TECX"

@@ -156,9 +156,15 @@ class AppLoader {
 			let uri = '';
 			if ( theConfig.loadOsmBusStopAllNetworks ) {
 
-				// Liège Province
+				// Province Liège
 				uri = 'https://lz4.overpass-api.de/api/interpreter?data=[out:json][timeout:40];' +
 					'node(area:3601407192)[highway=bus_stop];out;';
+
+				/*
+				// Province Luxembourg
+				uri = 'https://lz4.overpass-api.de/api/interpreter?data=[out:json][timeout:40];' +
+					'node(area:3601412581)[highway=bus_stop];out;';
+				*/
 			}
 			else {
 
@@ -174,8 +180,8 @@ class AppLoader {
 
 		if ( theConfig.loadOsmBus || theConfig.createNewWiki ) {
 			let uri = 'https://lz4.overpass-api.de/api/interpreter?data=[out:json][timeout:40];' +
-			'rel[network=' + theConfig.network + ']' +
-			'[operator=' + theConfig.operator + ']' +
+			'rel["network"~"' + theConfig.network + '"]' +
+			'["operator"~"' + theConfig.operator + '"]' +
 			'[type="' + theConfig.osmType + '"]->.rou;' +
 			'(.rou <<; - .rou;); >> ->.rm;.rm out;';
 

@@ -57,6 +57,13 @@ class DbDataLoader {
 
 	/**
 	* Coming soon
+	@type {String}
+	 */
+
+	get #allStopsTableName ( ) { return 'osm_bus_all_stops'; }
+
+	/**
+	* Coming soon
 	@param {Array} dataArray Coming soon
 	@param {String} tableName Coming soon
 	 */
@@ -173,13 +180,6 @@ class DbDataLoader {
 				theOsmData.routes,
 				this.#routeTableName
 			);
-			console.info ( 'Creating links' );
-			await this.#createLinks (
-				theOsmData.routeMasters,
-				'osm_routes_links'
-			);
-		}
-		if ( theConfig.loadOsmBusStop ) {
 			console.info ( 'Creating table ' + this.#stopsTableName );
 			await this.#createTable (
 				this.#searchTags ( theOsmData.stops ),
@@ -189,6 +189,34 @@ class DbDataLoader {
 			await this.#fillTable (
 				theOsmData.stops,
 				this.#stopsTableName
+			);
+			console.info ( 'Creating route links' );
+			await this.#createLinks (
+				theOsmData.routeMasters,
+				'osm_routes_links'
+			);
+			console.info ( 'Creating stop links' );
+			await this.#createLinks (
+				theOsmData.routes,
+				'osm_stops_links'
+			);
+		}
+		if ( theConfig.loadOsmBusStop ) {
+			let stopsTableName =
+				theConfig.loadOsmBusStopAllNetworks
+					?
+					this.#allStopsTableName
+					:
+					this.#stopsTableName;
+			console.info ( 'Creating table ' + stopsTableName );
+			await this.#createTable (
+				this.#searchTags ( theOsmData.stops ),
+				stopsTableName
+			);
+			console.info ( 'Filling table ' + stopsTableName );
+			await this.#fillTable (
+				theOsmData.stops,
+				stopsTableName
 			);
 		}
 	}

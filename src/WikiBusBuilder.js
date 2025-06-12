@@ -108,6 +108,7 @@ class WikiBusBuiler {
 		}
 		let wikiTextRelations = '| {{relation|' + results[ 0 ].osmRouteMasterId + '}} route_master and ' +
 		String ( results.length ) + ' route relations';
+
 		/*
 		results.forEach (
 			result => {
@@ -177,6 +178,25 @@ class WikiBusBuiler {
  	 */
 
 	async buildWiki ( ) {
+		this.#network = theOperator.getNetwork ( theConfig.network );
+		let wikiText = '';
+		const results = await theMySqlDb.execSql (
+			'SELECT osm_id as osmId, osm_description as osmDescription, osm_ref as osmRef ' +
+			'FROM osmbus.osm_bus_route_masters order by LPAD(osm_ref,5," "); '
+		);
+		results.forEach (
+			routeMaster => {
+				wikiText += '|----\n';
+				wikiText += '| style="background-color: green; color: white;"| ' + routeMaster.osmRef.trim ( ) + '\n';
+				wikiText += '| ' + routeMaster.osmDescription + '\n';
+				wikiText += '| Up-to-date with GTFS files\n';
+				wikiText += '| {{relation|' + routeMaster.osmId + '}}\n';
+			}
+		);
+		fs.writeFileSync ( './wiki/newWiki' + theConfig.network + '.txt', wikiText );
+	}
+
+	async buildWikiOld ( ) {
 		this.#network = theOperator.getNetwork ( theConfig.network );
 		await this.#controlWiki ( );
 		await this.#searchGTFSBusRef ( );

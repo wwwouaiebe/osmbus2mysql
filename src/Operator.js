@@ -20,10 +20,8 @@ class Operator {
 
 	async loadData ( ) {
 
-		const jsonOperator = await import (
-			'../operators/' + theConfig.operator + '.json',
-			{ assert : { type : 'json' } }
-		);
+		const jsonOperator = await import ( '../operators/' + theConfig.operator + '.json', { with : { type : 'json' } } );
+
 		this.#jsonOperator = jsonOperator.default;
 	}
 
